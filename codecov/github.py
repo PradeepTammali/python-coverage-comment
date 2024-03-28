@@ -87,6 +87,21 @@ def get_pr_number(github: github_client.GitHub, config: settings.Config) -> int:
     )
 
 
+def get_pr_diff(  # pylint: disable=too-many-arguments
+    github: github_client.GitHub,
+    repository: str,
+    pr_number: int,
+) -> None:
+    try:
+        pull_request = github.repos(repository).pulls(pr_number).get()
+        if pull_request.state != 'open':
+            raise github_client.NotFound
+    except github_client.Forbidden as exc:
+        raise CannotGetPullRequest from exc
+    except github_client.NotFound:
+        log.warning(f'Pull request #{pr_number} does not exist')
+
+
 def post_comment(  # pylint: disable=too-many-arguments
     github: github_client.GitHub,
     me: str,
